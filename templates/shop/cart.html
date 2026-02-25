@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart - Festival E-Commerce{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .cart-header h1 {
+        color: var(--primary-color);
+    }
+
+    .cart-items {
+        margin-bottom: 2rem;
+    }
+
+    .cart-item {
+        display: grid;
+        grid-template-columns: 120px 1fr auto;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        align-items: center;
+    }
+
+    .cart-item-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cart-item-info h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+
+    .cart-item-category {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .cart-item-price {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+    }
+
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .quantity-control form {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quantity-control input {
+        width: 60px;
+        padding: 0.4rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+    }
+
+    .quantity-control button {
+        padding: 0.4rem 0.8rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .cart-item-actions {
+        text-align: right;
+    }
+
+    .item-subtotal {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .cart-summary {
+        background: #f9f9f9;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 2rem;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-row.total {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        border-bottom: none;
+        margin-top: 1rem;
+    }
+
+    .checkout-btn {
+        width: 100%;
+        padding: 1.2rem;
+        margin-top: 1.5rem;
+        font-size: 1.2rem;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #999;
+    }
+
+    .empty-cart i {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .cart-item {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .cart-item-actions {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <div class="cart-header">
+        <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
+        <span>{{ cart.total_items }} Items</span>
+    </div>
+
+    {% if cart.items.all %}
+        <div class="cart-items">
+            {% for item in cart.items.all %}
+            <div class="cart-item">
+                <div class="cart-item-image">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    {% else %}
+                        <i class="fas fa-image fa-3x" style="color: #ccc;"></i>
+                    {% endif %}
+                </div>
+
+                <div class="cart-item-info">
+                    <h3>{{ item.product.name }}</h3>
+                    <div class="cart-item-category">
+                        <i class="fas fa-tag"></i> {{ item.product.category.name }}
+                    </div>
+                    <div class="cart-item-price">₹{{ item.product.final_price|floatformat:2 }}</div>
+                    
+                    <div class="quantity-control">
+                        <form method="post" action="{% url 'update_cart' item.id %}">
+                            {% csrf_token %}
+                            <label>Quantity:</label>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}">
+                            <button type="submit"><i class="fas fa-sync"></i> Update</button>
+                        </form>
+                        
+                        <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" style="background: #dc3545;">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="cart-item-actions">
+                    <div class="item-subtotal">₹{{ item.subtotal|floatformat:2 }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-summary">
+            <h3 style="margin-bottom: 1rem; color: var(--text-color);">Order Summary</h3>
+            
+            <div class="summary-row">
+                <span>Subtotal ({{ cart.total_items }} items)</span>
+                <span>₹{{ cart.total_price|floatformat:2 }}</span>
+            </div>
+            
+            <div class="summary-row">
+                <span>Delivery Charges</span>
+                <span style="color: #28a745;">FREE</span>
+            </div>
+            
+            <div class="summary-row total">
+                <span>Total Amount</span>
+                <span>₹{{ cart.total_price|floatformat:2 }}</span>
+            </div>
+            
+            <a href="{% url 'checkout' %}" class="btn btn-primary checkout-btn">
+                <i class="fas fa-lock"></i> Proceed to Checkout
+            </a>
+        </div>
+    {% else %}
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your cart is empty</h2>
+            <p>Add some items to get started!</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block;">
+                <i class="fas fa-shopping-bag"></i> Browse Products
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

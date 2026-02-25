@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Festival E-Commerce{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 2rem;
+    }
+
+    .checkout-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .checkout-form h2 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-group textarea,
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .order-summary {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        height: fit-content;
+    }
+
+    .order-summary h2 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-product {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+        background: #f0f0f0;
+    }
+
+    .summary-product-info {
+        flex: 1;
+    }
+
+    .summary-product-name {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .summary-product-qty {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5rem 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        border-top: 2px solid var(--primary-color);
+    }
+
+    .place-order-btn {
+        width: 100%;
+        padding: 1.2rem;
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+    }
+
+    .coupon-section {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .coupon-input {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .coupon-input input {
+        flex: 1;
+    }
+
+    @media (max-width: 968px) {
+        .checkout-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-form">
+        <h2><i class="fas fa-shipping-fast"></i> Shipping Information</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="address"><i class="fas fa-map-marker-alt"></i> Delivery Address *</label>
+                <textarea id="address" name="address" required>{{ user.address }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_method"><i class="fas fa-credit-card"></i> Payment Method *</label>
+                <select id="payment_method" name="payment_method" required>
+                    <option value="COD">Cash on Delivery (COD)</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Card">Credit/Debit Card</option>
+                    <option value="NetBanking">Net Banking</option>
+                </select>
+            </div>
+
+            <div class="coupon-section">
+                <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">
+                    <i class="fas fa-tag"></i> Have a Coupon Code?
+                </label>
+                <div class="coupon-input">
+                    <input type="text" name="coupon_code" placeholder="Enter coupon code">
+                </div>
+                <small style="color: #666; display: block; margin-top: 0.5rem;">
+                    Enter coupon code before placing order
+                </small>
+            </div>
+
+            <button type="submit" class="btn btn-primary place-order-btn">
+                <i class="fas fa-check-circle"></i> Place Order
+            </button>
+        </form>
+    </div>
+
+    <div class="order-summary">
+        <h2><i class="fas fa-receipt"></i> Order Summary</h2>
+        
+        {% for item in cart.items.all %}
+        <div class="summary-item">
+            <div style="width: 100%;">
+                <div class="summary-product">
+                    <div class="summary-product-image">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                        {% else %}
+                            <i class="fas fa-image"></i>
+                        {% endif %}
+                    </div>
+                    <div class="summary-product-info">
+                        <div class="summary-product-name">{{ item.product.name }}</div>
+                        <div class="summary-product-qty">Qty: {{ item.quantity }} × ₹{{ item.product.final_price|floatformat:2 }}</div>
+                    </div>
+                </div>
+                <div style="text-align: right; font-weight: bold; color: var(--primary-color);">
+                    ₹{{ item.subtotal|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div style="padding: 1rem 0; border-top: 1px solid var(--border-color); margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Subtotal</span>
+                <span>₹{{ cart.total_price|floatformat:2 }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Delivery Charges</span>
+                <span style="color: #28a745;">FREE</span>
+            </div>
+        </div>
+
+        <div class="summary-total">
+            <span>Total Amount</span>
+            <span>₹{{ cart.total_price|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

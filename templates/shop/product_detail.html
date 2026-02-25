@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Festival E-Commerce{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        margin-bottom: 3rem;
+    }
+
+    .product-image-section {
+        text-align: center;
+    }
+
+    .product-main-image {
+        width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #f9f9f9;
+    }
+
+    .product-info-section h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+    }
+
+    .product-meta {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .product-rating {
+        color: #ffa500;
+        font-weight: bold;
+    }
+
+    .product-price-section {
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        background: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .current-price {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .original-price {
+        font-size: 1.5rem;
+        color: #999;
+        text-decoration: line-through;
+        margin-left: 1rem;
+    }
+
+    .discount-badge {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 5px;
+        margin-left: 1rem;
+        font-weight: bold;
+    }
+
+    .product-description {
+        margin-bottom: 2rem;
+    }
+
+    .product-description h3 {
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+
+    .product-description p {
+        line-height: 1.8;
+        color: #666;
+    }
+
+    .product-details-table {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .product-details-table th,
+    .product-details-table td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .product-details-table th {
+        background: #f9f9f9;
+        font-weight: 600;
+        width: 30%;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .product-actions form,
+    .product-actions .btn {
+        flex: 1;
+    }
+
+    .product-actions .btn {
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .stock-info {
+        padding: 1rem;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 5px;
+        margin-bottom: 1.5rem;
+    }
+
+    .out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .related-products {
+        margin-top: 3rem;
+    }
+
+    .related-products h2 {
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+    }
+
+    .product-card-info {
+        padding: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .product-detail {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .product-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="product-image-section">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-main-image">
+        {% else %}
+            <img src="https://via.placeholder.com/500x500/FF6B35/FFFFFF?text={{ product.name|slice:':20'|urlencode }}" alt="{{ product.name }}" class="product-main-image">
+        {% endif %}
+    </div>
+
+    <div class="product-info-section">
+        <h1>{{ product.name }}</h1>
+
+        <div class="product-meta">
+            <div class="meta-item">
+                <i class="fas fa-tag"></i>
+                <span>{{ product.category.name }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-star" style="color: #ffa500;"></i>
+                <span class="product-rating">{{ product.rating }}</span>
+            </div>
+        </div>
+
+        <div class="product-price-section">
+            <span class="current-price">₹{{ product.final_price|floatformat:2 }}</span>
+            {% if product.discount_price %}
+                <span class="original-price">₹{{ product.price|floatformat:2 }}</span>
+                <span class="discount-badge">
+                    {% widthratio product.discount_price product.price 100 %}% OFF
+                </span>
+            {% endif %}
+        </div>
+
+        {% if product.stock > 0 %}
+            <div class="stock-info">
+                <i class="fas fa-check-circle"></i> In Stock ({{ product.stock }} available)
+            </div>
+        {% else %}
+            <div class="stock-info out-of-stock">
+                <i class="fas fa-times-circle"></i> Out of Stock
+            </div>
+        {% endif %}
+
+        {% if user.is_authenticated and product.stock > 0 %}
+        <div class="product-actions">
+            <form method="post" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+            </form>
+            <form method="post" action="{% url 'add_to_wishlist' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-heart"></i> Add to Wishlist
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="product-description">
+            <h3><i class="fas fa-info-circle"></i> Product Description</h3>
+            <p>{{ product.description }}</p>
+        </div>
+
+        <table class="product-details-table">
+            <thead>
+                <tr>
+                    <th colspan="2"><i class="fas fa-list"></i> Product Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Product ID</th>
+                    <td>{{ product.id }}</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>{{ product.category.name }}</td>
+                </tr>
+                <tr>
+                    <th>Price</th>
+                    <td>₹{{ product.final_price|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Stock</th>
+                    <td>{{ product.stock }} units</td>
+                </tr>
+                <tr>
+                    <th>Rating</th>
+                    <td>{{ product.rating }} / 5.0</td>
+                </tr>
+                {% if product.festivals.all %}
+                <tr>
+                    <th>Available for Festivals</th>
+                    <td>
+                        {% for festival in product.festivals.all %}
+                            {{ festival.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if related_products %}
+<div class="related-products">
+    <h2><i class="fas fa-shopping-bag"></i> Related Products</h2>
+    <div class="products-grid">
+        {% for related in related_products %}
+        <div class="product-card">
+            {% if related.image %}
+                <img src="{{ related.image.url }}" alt="{{ related.name }}" class="product-card-image">
+            {% else %}
+                <div class="product-card-image">
+                    <i class="fas fa-image fa-3x"></i>
+                </div>
+            {% endif %}
+
+            <div class="product-card-info">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">{{ related.name }}</h3>
+                <p style="color: var(--primary-color); font-weight: bold; margin-bottom: 0.5rem;">
+                    ₹{{ related.final_price|floatformat:2 }}
+                </p>
+                <a href="{% url 'product_detail' related.slug %}" class="btn btn-primary" style="width: 100%; text-align: center;">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

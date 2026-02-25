@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.order_number }} - Festival E-Commerce{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .order-header {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary-color), #ff8c42);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .order-header h1 {
+        margin-bottom: 0.5rem;
+    }
+
+    .order-header p {
+        font-size: 1.1rem;
+    }
+
+    .order-status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-weight: bold;
+        margin-top: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .info-section {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .info-section h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #666;
+    }
+
+    .info-value {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .order-items-section {
+        margin-bottom: 2rem;
+    }
+
+    .order-items-section h2 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .order-items-table th,
+    .order-items-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .order-items-table th {
+        background: #f9f9f9;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .order-items-table tbody tr:hover {
+        background: #f9f9f9;
+    }
+
+    .order-summary {
+        background: #f9f9f9;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 400px;
+        margin-left: auto;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-row.total {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        border-bottom: none;
+        margin-top: 1rem;
+        border-top: 2px solid var(--primary-color);
+        padding-top: 1rem;
+    }
+
+    .tracking-timeline {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .tracking-timeline h3 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 3rem;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 2rem;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px var(--primary-color);
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: -2.1rem;
+        top: 20px;
+        width: 2px;
+        height: 100%;
+        background: var(--border-color);
+    }
+
+    .timeline-item:last-child::after {
+        display: none;
+    }
+
+    .timeline-content {
+        font-weight: 600;
+    }
+
+    .timeline-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+    }
+
+    @media (max-width: 768px) {
+        .order-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .order-items-table {
+            font-size: 0.9rem;
+        }
+
+        .order-items-table th,
+        .order-items-table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-detail">
+    <div class="order-header">
+        <h1><i class="fas fa-receipt"></i> Order Invoice</h1>
+        <p>Order #{{ order.order_number }}</p>
+        <span class="order-status-badge">{{ order.get_status_display }}</span>
+    </div>
+
+    <div class="order-info-grid">
+        <div class="info-section">
+            <h3><i class="fas fa-calendar"></i> Order Information</h3>
+            <div class="info-row">
+                <span class="info-label">Order Date:</span>
+                <span class="info-value">{{ order.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Order Time:</span>
+                <span class="info-value">{{ order.created_at|time:"h:i A" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Payment Method:</span>
+                <span class="info-value">{{ order.payment_method }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3><i class="fas fa-user"></i> Customer Details</h3>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ order.user.get_full_name|default:order.user.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ order.user.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{{ order.user.phone|default:"N/A" }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
+            <p style="color: var(--text-color); line-height: 1.6;">{{ order.shipping_address }}</p>
+        </div>
+    </div>
+
+    <div class="order-items-section">
+        <h2><i class="fas fa-shopping-bag"></i> Order Items</h2>
+        <table class="order-items-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>₹{{ item.price|floatformat:2 }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td style="font-weight: 600; color: var(--primary-color);">₹{{ item.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="order-summary">
+        <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>₹{{ order.total_amount|floatformat:2 }}</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+        <div class="summary-row">
+            <span>Discount:</span>
+            <span style="color: #28a745;">-₹{{ order.discount_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
+        {% if order.coupon %}
+        <div class="summary-row">
+            <span>Coupon Applied:</span>
+            <span style="color: #28a745;">{{ order.coupon.code }}</span>
+        </div>
+        {% endif %}
+        <div class="summary-row">
+            <span>Delivery Charges:</span>
+            <span style="color: #28a745;">FREE</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total Amount:</span>
+            <span>₹{{ order.final_amount|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <div class="tracking-timeline">
+        <h3><i class="fas fa-truck"></i> Order Tracking</h3>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">Order Placed</div>
+                <div class="timeline-date">{{ order.created_at|date:"M d, Y h:i A" }}</div>
+            </div>
+            {% if order.status != 'pending' %}
+            <div class="timeline-item">
+                <div class="timeline-content">Order Processing</div>
+                <div class="timeline-date">{{ order.updated_at|date:"M d, Y h:i A" }}</div>
+            </div>
+            {% endif %}
+            {% if order.status == 'shipped' or order.status == 'delivered' %}
+            <div class="timeline-item">
+                <div class="timeline-content">Order Shipped</div>
+                <div class="timeline-date">{{ order.updated_at|date:"M d, Y h:i A" }}</div>
+            </div>
+            {% endif %}
+            {% if order.status == 'delivered' %}
+            <div class="timeline-item">
+                <div class="timeline-content">Order Delivered</div>
+                <div class="timeline-date">{{ order.updated_at|date:"M d, Y h:i A" }}</div>
+            </div>
+            {% endif %}
+            {% if order.status == 'cancelled' %}
+            <div class="timeline-item">
+                <div class="timeline-content">Order Cancelled</div>
+                <div class="timeline-date">{{ order.updated_at|date:"M d, Y h:i A" }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'order_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+</div>
+{% endblock %}
