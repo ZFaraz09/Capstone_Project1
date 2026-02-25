@@ -1,0 +1,62 @@
+═══════════════════════════════════════════════════════════════
+  THE 5 REQUIRED ENVIRONMENT VARIABLES FOR RENDER.COM
+═══════════════════════════════════════════════════════════════
+
+Variable 1:
+-----------
+NAME:  SECRET_KEY
+VALUE: (Click "Generate" button in Render UI)
+
+
+Variable 2:
+-----------
+NAME:  DEBUG
+VALUE: False
+
+
+Variable 3:
+-----------
+NAME:  PYTHON_VERSION
+VALUE: 3.12.3
+
+
+Variable 4:
+-----------
+NAME:  ALLOWED_HOSTS
+VALUE: YOUR-SERVICE-NAME.onrender.com
+       ↑ Replace with your actual service name!
+
+
+Variable 5:
+-----------
+NAME:  CSRF_TRUSTED_ORIGINS
+VALUE: https://YOUR-SERVICE-NAME.onrender.com
+       ↑ Include https:// and replace with your service name!
+
+
+═══════════════════════════════════════════════════════════════
+EXAMPLE (if your service name is "capstone-project"):
+═══════════════════════════════════════════════════════════════
+
+1. SECRET_KEY          = (generated-random-key-here)
+2. DEBUG               = False
+3. PYTHON_VERSION      = 3.12.3
+4. ALLOWED_HOSTS       = capstone-project.onrender.com
+5. CSRF_TRUSTED_ORIGINS = https://capstone-project.onrender.com
+
+
+═══════════════════════════════════════════════════════════════
+TO ADD IN RENDER:
+═══════════════════════════════════════════════════════════════
+
+1. Scroll to "Environment Variables" section
+2. Click "Add Environment Variable"
+3. Enter NAME and VALUE for each variable above
+4. For SECRET_KEY, use the "Generate" button
+5. Repeat for all 5 variables
+6. Click "Create Web Service"
+
+
+Your site will be live at: https://YOUR-SERVICE-NAME.onrender.com
+
+═══════════════════════════════════════════════════════════════
